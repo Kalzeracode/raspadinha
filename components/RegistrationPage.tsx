@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from './AuthContext';
-import Header from './shared/Header';
+import React, { useState } from 'react';
+import { register } from './apiService';
 
 const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className || 'w-6 h-6'}>
@@ -9,31 +8,19 @@ const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 interface RegistrationPageProps {
-    currentPage: string;
-    setCurrentPage: (page: any) => void;
-    user: any;
-    handleRoleBasedRedirect: () => void;
+    onNavigateToLogin: () => void;
+    onRegister: (data: { token: string, user: { name: string, credits: number } }) => void;
 }
 
-const RegistrationPage: React.FC<RegistrationPageProps> = ({ setCurrentPage, handleRoleBasedRedirect }) => {
-    const { register } = useAuth();
+const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigateToLogin, onRegister }) => {
     const [fullName, setFullName] = useState('');
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [afiliadoCode, setAfiliadoCode] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
-    // Verificar se há código de afiliado na URL
-    useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const refCode = urlParams.get('ref');
-        if (refCode) {
-            setAfiliadoCode(refCode);
-        }
-    }, []);
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         let value = e.target.value.replace(/\D/g, '');
@@ -56,11 +43,10 @@ const RegistrationPage: React.FC<RegistrationPageProps> = ({ setCurrentPage, han
         setSuccess(null);
 
         try {
-            await register(email, password, fullName, phone, afiliadoCode || undefined);
-            setSuccess('Usuário registrado com sucesso! Redirecionando...');
-            setTimeout(() => {
-                handleRoleBasedRedirect();
-            }, 2000);
+            // Nota: O backend precisa ser ajustado para salvar fullName e phone.
+            // A chamada atual envia apenas o que a API de registro espera.
+            const data = await register({ fullName, phone, email, password });
+            setSuccess(data.message || 'Usuário registrado com sucesso! Faça o login para continuar.');
         } catch (err: any) {
              setError(err.message || 'Falha ao tentar registrar.');
         } finally {
@@ -68,24 +54,8 @@ const RegistrationPage: React.FC<RegistrationPageProps> = ({ setCurrentPage, han
         }
     };
 
-    const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-        <main className="min-h-screen w-full bg-slate-900 text-white flex items-center justify-center p-4 selection:bg-brand-pink/30">
-           <div className="absolute inset-0 z-0">
-              <div className="absolute inset-0 bg-gradient-to-br from-brand-purple via-slate-900 to-brand-pink opacity-30"></div>
-              <div className="absolute top-0 left-0 h-1/2 w-1/2 rounded-full bg-brand-yellow/10 blur-3xl"></div>
-              <div className="absolute bottom-0 right-0 h-1/2 w-1/2 rounded-full bg-brand-green/10 blur-3xl"></div>
-           </div>
-           <div className="relative z-10 w-full">
-             {children}
-           </div>
-        </main>
-    );
-
     return (
-        <>
-            <Header currentPage="register" setCurrentPage={setCurrentPage} user={null} />
-            <AuthLayout>
-                <div className="w-full max-w-4xl mx-auto bg-slate-800/50 backdrop-blur-lg rounded-2xl shadow-2xl shadow-black/30 overflow-hidden border border-slate-700">
+        <div className="w-full max-w-4xl mx-auto bg-slate-800/50 backdrop-blur-lg rounded-2xl shadow-2xl shadow-black/30 overflow-hidden border border-slate-700">
             <div className="flex flex-col md:flex-row">
                 {/* Left Column: Form */}
                 <div className="w-full md:w-1/2 p-8 md:p-10">
@@ -99,7 +69,7 @@ const RegistrationPage: React.FC<RegistrationPageProps> = ({ setCurrentPage, han
                             <h2 className="text-2xl font-bold text-slate-100 mb-2">Cadastro Realizado!</h2>
                             <p className="text-slate-300 mb-6">{success}</p>
                             <button
-                                onClick={() => setCurrentPage('login')}
+                                onClick={onNavigateToLogin}
                                 className="w-full bg-gradient-to-r from-brand-pink to-brand-yellow hover:from-brand-pink/90 hover:to-brand-yellow/90 text-white font-bold py-3 px-4 rounded-lg"
                             >
                                 Ir para Login
@@ -116,12 +86,6 @@ const RegistrationPage: React.FC<RegistrationPageProps> = ({ setCurrentPage, han
                                 <label htmlFor="phone" className="sr-only">Telefone</label>
                                 <input id="phone" name="phone" type="tel" required value={phone} onChange={handlePhoneChange} className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-pink focus:border-brand-pink transition-all duration-300" placeholder="Telefone (DDD)" />
                             </div>
-                            {afiliadoCode && (
-                                <div>
-                                    <label htmlFor="afiliadoCode" className="sr-only">Código de Afiliado</label>
-                                    <input id="afiliadoCode" name="afiliadoCode" type="text" value={afiliadoCode} onChange={(e) => setAfiliadoCode(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-pink focus:border-brand-pink transition-all duration-300" placeholder="Código de Afiliado" />
-                                </div>
-                            )}
                             <div>
                                 <label htmlFor="reg-email" className="sr-only">Email</label>
                                 <input id="reg-email" name="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-pink focus:border-brand-pink transition-all duration-300" placeholder="Email" />
@@ -143,7 +107,7 @@ const RegistrationPage: React.FC<RegistrationPageProps> = ({ setCurrentPage, han
                      <div className="mt-6 text-center text-sm">
                         <p className="text-slate-400">
                            Já tem conta?{' '}
-                            <button onClick={() => setCurrentPage('login')} className="font-medium text-brand-yellow hover:text-brand-pink underline transition-colors duration-300 bg-transparent border-none cursor-pointer p-0">
+                            <button onClick={onNavigateToLogin} className="font-medium text-brand-yellow hover:text-brand-pink underline transition-colors duration-300 bg-transparent border-none cursor-pointer p-0">
                                 Faça Login
                             </button>
                         </p>
@@ -171,9 +135,7 @@ const RegistrationPage: React.FC<RegistrationPageProps> = ({ setCurrentPage, han
                     </div>
                 </div>
             </div>
-                </div>
-            </AuthLayout>
-        </>
+        </div>
     );
 };
 
