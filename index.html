@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Raspadinhas Online - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'brand-purple': '#6d28d9',
+              'brand-pink': '#ec4899',
+              'brand-yellow': '#f59e0b',
+              'brand-green': '#10b981',
+            },
+            animation: {
+              marquee: 'marquee 40s linear infinite',
+              'reveal-glow': 'reveal-glow 0.8s ease-out forwards',
+            },
+            keyframes: {
+              marquee: {
+                '0%': { transform: 'translateX(0%)' },
+                '100%': { transform: 'translateX(-50%)' },
+              },
+              'reveal-glow': {
+                '0%': { boxShadow: '0 0 5px rgba(250, 204, 21, 0.2)' },
+                '50%': { boxShadow: '0 0 25px 15px rgba(250, 204, 21, 0.6)' },
+                '100%': { boxShadow: '0 0 8px rgba(250, 204, 21, 0.3)' },
+              }
+            },
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
